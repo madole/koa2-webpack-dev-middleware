@@ -143,23 +143,23 @@ module.exports = function(compiler, options) {
 	}
 
 	function handleRangeHeaders(content, req, res) {
-		if (req.headers['Accept-Ranges']) res.setHeader('Accept-Ranges', 'bytes');
+		if (req.headers['Accept-Ranges']) res.set('Accept-Ranges', 'bytes');
 		if (req.headers.range) {
 			var ranges = parseRange(content.length, req.headers.range);
 
 			// unsatisfiable
 			if (-1 == ranges) {
-				res.setHeader('Content-Range', 'bytes */' + content.length);
-				res.statusCode = 416;
+				res.set('Content-Range', 'bytes */' + content.length);
+				res.status = 416;
 				return content;
 			}
 
 			// valid (syntactically invalid/multiple ranges are treated as a regular response)
 			if (-2 != ranges && ranges.length === 1) {
 				// Content-Range
-				res.statusCode = 206;
+				res.status = 206;
 				var length = content.length;
-				res.setHeader(
+				res.set(
 					'Content-Range',
 					'bytes ' + ranges[0].start + '-' + ranges[0].end + '/' + length
 				);
@@ -171,7 +171,8 @@ module.exports = function(compiler, options) {
 	}
 
 	// The middleware function
-	function webpackDevMiddleware(req, res, next) {
+	function webpackDevMiddleware(ctx, next) {
+        const { req, res } = ctx;
 		var filename = getFilenameFromUrl(req.url);
 		if (filename === false) return next();
 
@@ -208,16 +209,15 @@ module.exports = function(compiler, options) {
 			// server content
 			var content = fs.readFileSync(filename);
 			content = handleRangeHeaders(content, req, res);
-			res.setHeader("Access-Control-Allow-Origin", "*"); // To support XHR, etc.
-			res.setHeader("Content-Type", mime.lookup(filename));
-			res.setHeader("Content-Length", content.length);
+			res.set("Access-Control-Allow-Origin", "*"); // To support XHR, etc.
+			res.set("Content-Type", mime.lookup(filename));
+			res.set("Content-Length", content.length);
 			if(options.headers) {
 				for(var name in options.headers) {
-					res.setHeader(name, options.headers[name]);
+					res.set(name, options.headers[name]);
 				}
 			}
-			if (res.send) res.send(content);
-			else res.end(content);
+			ctx.body = content;
 		}
 	}
 
