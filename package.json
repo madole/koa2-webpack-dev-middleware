@@ -1,8 +1,8 @@
 {
-  "name": "webpack-dev-middleware",
-  "version": "1.6.1",
-  "author": "Tobias Koppers @sokra",
-  "description": "Offers a dev middleware for webpack, which arguments a live bundle to a directory",
+  "name": "koa2-webpack-dev-middleware",
+  "version": "0.0.1",
+  "author": "@madole",
+  "description": "Offers a koa@2 dev middleware for webpack, which arguments a live bundle to a directory",
   "peerDependencies": {
     "webpack": "1 || ^2.1.0-beta"
   },
